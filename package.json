@@ -1,0 +1,52 @@
+{
+  "name": "zxoud-admin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"./**/*.{html,vue,ts,js,json,md}\""
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "path": "^0.12.7",
+    "pinia": "^2.0.17",
+    "vue": "^3.2.37",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@unocss/preset-uno": "^0.44.7",
+    "@vicons/ionicons5": "^0.12.0",
+    "@vitejs/plugin-vue": "^3.0.0",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "mockjs": "^1.1.0",
+    "naive-ui": "^2.32.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.6.4",
+    "unocss": "^0.44.7",
+    "unplugin-auto-import": "^0.10.2",
+    "unplugin-vue-components": "^0.21.2",
+    "vfonts": "^0.0.3",
+    "vite": "^3.0.0",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue-tsc": "^0.38.4"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "semi": true,
+    "trailingComma": "all"
+  },
+  "eslint": {
+    "extends": [
+      "plugin:vue/vue3-recommended",
+      "prettier"
+    ]
+  }
+}
