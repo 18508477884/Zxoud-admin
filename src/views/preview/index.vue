@@ -28,7 +28,7 @@
             :class="[
               item.type == '文件夹' ? 'bg-yellow-300' : 'bg-gray-400',
               selectedState.indexOf(item.name) >= 0 ? 'selectedState' : '',
-              shiftNum == index
+              shiftNum == index && !isfirst
                 ? 'border-2 rounded border-blue-400 border-opacity-60'
                 : '',
             ]"
@@ -71,8 +71,8 @@ const isPreview = ref('#FFF');
 const isshift = ref(false); // 快捷键 shift 是否被按下
 const isctrl = ref(false); // 快捷键 ctrl 是否被按下
 const selectedState = ref<string[]>([]); // 上方div图切是否被多选中，
-const isfirst = ref(true); // 上方div图切是否被多选中，
-const shiftNum = ref<number>(NaN); //
+const isfirst = ref(true);
+const shiftNum = ref<number>(0); //
 
 function updateFolder() {
   getFolderData();
@@ -82,7 +82,7 @@ const replace = function (index: number = directory.value.length) {
   //切换目录
   selectedState.value = [];
   isfirst.value = true;
-  shiftNum.value = NaN;
+  shiftNum.value = 0;
   console.log(index, directory.value.length);
   directory.value.splice(index + 1);
   if (index == 0) {
@@ -108,7 +108,7 @@ async function getFolderData() {
   //
   selectedState.value = [];
   isfirst.value = true;
-  shiftNum.value = NaN;
+  shiftNum.value = 0;
 }
 
 let enter = (name: string, type: string) => {
@@ -121,7 +121,7 @@ let enter = (name: string, type: string) => {
     );
     selectedState.value = [];
     isfirst.value = true;
-    shiftNum.value = NaN;
+    shiftNum.value = 0;
     isPreview.value = '#FFF';
   } else {
     isPreview.value = '#999';
@@ -134,45 +134,43 @@ let preview = (type: string, name: string, index: number) => {
   } else {
     isPreview.value = '#FFF';
   }
-  if (isctrl.value) {
-    // 如果按下的是ctrl
-    let i = selectedState.value.indexOf(name); // 判断选中列表中是否包含这个点击的div
-    if (i < 0) {
-      selectedState.value.push(name); // 如果不包含就加进去
-    } else {
-      selectedState.value.splice(i, 1); // 如果包含就删，表示按下ctrl键点一下选中，在点一下取消选中
-    }
-  } else if (isshift.value) {
-    // 如果按下的是shift
-    if (isfirst.value) {
-      //第一次点击
-      if (selectedState.value.length == 0) {
-        selectedState.value.push(name);
-      }
-    } else {
-      console.log(shiftNum.value, index);
-      selectedState.value = [];
-      let i, j;
-      shiftNum.value > index
-        ? ((i = index), (j = shiftNum.value))
-        : ((i = shiftNum.value), (j = index));
-      for (i; i <= j; i++) {
-        // 把中间的都选中
-        selectedState.value.push(state.currentFile[i].name);
-      }
-    }
-    console.log(selectedState.value);
-  }
   isfirst.value = false;
-  shiftNum.value = index; // 让当前点击的下标赋值给shiftNum
-  if (!isshift.value && !isctrl.value) {
-    //没有进入键盘事件
-    selectedState.value = [name];
-  }
-  if (selectedState.value.length == 0) {
-    selectedState.value.push(name);
+  if (isctrl.value) {
+    ctrlFun(name, index);
+  } else if (isshift.value) {
+    shiftFun(name, index);
+  } else {
+    //没有使用键盘事件
+    shiftNum.value = index; // 让当前点击的下标赋值给shiftNum
+    console.log(selectedState.value);
+    if (selectedState.value.length == 0) {
+      selectedState.value.push(name);
+    }
   }
 };
+function ctrlFun(name: string, index: number) {
+  // 如果按下的是ctrl
+  let i = selectedState.value.indexOf(name); // 判断选中列表中是否包含这个点击的div
+  if (i < 0) {
+    selectedState.value.push(name); // 如果不包含就加进去
+  } else {
+    selectedState.value.splice(i, 1); // 如果包含就删，表示按下ctrl键点一下选中，在点一下取消选中
+  }
+  shiftNum.value = index;
+}
+function shiftFun(name: string, index: number) {
+  // 如果按下的是shift
+  selectedState.value = [];
+  let i, j;
+  shiftNum.value > index
+    ? ((i = index), (j = shiftNum.value))
+    : ((i = shiftNum.value), (j = index));
+  for (i; i <= j; i++) {
+    // 把中间的都选中
+    selectedState.value.push(state.currentFile[i].name);
+  }
+}
+
 function compare() {
   //排序 文件夹排在前面
   return function (object1: Folder, object2: Folder) {
