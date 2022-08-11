@@ -28,24 +28,7 @@
 <script setup lang="ts">
 import { appStore } from '@/store';
 const app_store = appStore();
-const nameRef = ref(1);
-const message = useMessage();
-const panelsRef = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-const panels = panelsRef;
-const name = nameRef;
-function handleClose(name: number) {
-  const { value: panels } = panelsRef;
-  if (panels.length === 1) {
-    message.error('最后一个了');
-    return;
-  }
-  message.info('关掉 ' + name);
-  const index = panels.findIndex((v) => name === v);
-  panels.splice(index, 1);
-  if (nameRef.value === name) {
-    nameRef.value = panels[index];
-  }
-}
+
 //
 const options1 = [
   {

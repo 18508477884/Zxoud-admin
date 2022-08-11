@@ -1,6 +1,6 @@
 ## 项目介绍
 
-[Zxoud-admin] 是 Zxoud 后台管理；使用前端主流技术栈 Vue3 + Vite3 + TypeScript + Vue Router + Pinia + Volar + Naive UI 等；
+Zxoud-admin 是 Zxoud 后台管理；使用前端主流技术栈 Vue3 + Vite3 + TypeScript + Vue Router + Pinia + Volar + Naive UI 等；
 
 ## 技术栈
 
@@ -32,15 +32,15 @@
 
 ### 项目启动
 
-1. npm install
-2. npm run dev
+1. pnpm install
+2. pnpm run dev
 
 ### 项目部署
 
 - 本地打包
 
   ```
-  npm run build
+  pnpm run build
   ```
 
   生成的静态文件位于项目根目录 dist 文件夹下

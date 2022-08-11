@@ -17,11 +17,7 @@ import { NIcon } from 'naive-ui';
 import { darkTheme } from 'naive-ui';
 import type { MenuOption } from 'naive-ui';
 import { RouterLink } from 'vue-router';
-import {
-  FolderOutline,
-  PersonOutline as PersonIcon,
-  HomeOutline as HomeIcon,
-} from '@vicons/ionicons5';
+import { FolderOutline, HomeOutline as HomeIcon } from '@vicons/ionicons5';
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
 }

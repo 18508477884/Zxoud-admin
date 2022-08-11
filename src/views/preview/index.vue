@@ -22,21 +22,26 @@
           <div class="w30">类型</div>
           <div class="w20">大小</div>
         </div>
-        <div
-          class="flex hover:bg-blue-300 py-1 cursor-pointer my-2 select-none"
-          :class="[
-            item.type == '文件夹' ? 'bg-yellow-300' : 'bg-gray-400',
-            selectedState.indexOf(item.name) >= 0 ? 'selectedState' : '',
-          ]"
-          v-for="(item, index) in currentFile"
-          :key="item.id"
-          @click="preview(item.type, item.name, index)"
-          @dblclick="enter(item.name, item.type)"
-        >
-          <div class="w65">{{ item.name }}</div>
-          <div class="w40">{{ item.time }}</div>
-          <div class="w30">{{ item.type }}</div>
-          <div class="w20">{{ item.size }}M</div>
+        <div id="contentWrap">
+          <div
+            class="flex hover:bg-blue-100 py-1 cursor-pointer my-2 select-none"
+            :class="[
+              item.type == '文件夹' ? 'bg-yellow-300' : 'bg-gray-400',
+              selectedState.indexOf(item.name) >= 0 ? 'selectedState' : '',
+              shiftNum == index
+                ? 'border-2 rounded border-blue-400 border-opacity-60'
+                : '',
+            ]"
+            v-for="(item, index) in currentFile"
+            :key="item.id"
+            @click="preview(item.type, item.name, index)"
+            @dblclick="enter(item.name, item.type)"
+          >
+            <div class="w65">{{ item.name }}</div>
+            <div class="w40">{{ item.time }}</div>
+            <div class="w30">{{ item.type }}</div>
+            <div class="w20">{{ item.size }}M</div>
+          </div>
         </div>
       </div>
       <div class="preview flex-1">预览</div>
@@ -66,14 +71,18 @@ const isPreview = ref('#FFF');
 const isshift = ref(false); // 快捷键 shift 是否被按下
 const isctrl = ref(false); // 快捷键 ctrl 是否被按下
 const selectedState = ref<string[]>([]); // 上方div图切是否被多选中，
-
-const shiftNum = ref(0); //
+const isfirst = ref(true); // 上方div图切是否被多选中，
+const shiftNum = ref<number>(NaN); //
 
 function updateFolder() {
   getFolderData();
   //replace();
 }
 const replace = function (index: number = directory.value.length) {
+  //切换目录
+  selectedState.value = [];
+  isfirst.value = true;
+  shiftNum.value = NaN;
   console.log(index, directory.value.length);
   directory.value.splice(index + 1);
   if (index == 0) {
@@ -87,7 +96,6 @@ const replace = function (index: number = directory.value.length) {
           (item: { name: string }) => item.name == directory.value[index],
         )?.children
       );
-
       state.currentFile = findDirectory;
     }
     console.log('返回', directory.value, state.AllFolderList);
@@ -99,22 +107,28 @@ async function getFolderData() {
   state.currentFile = state.AllFolderList = data.data;
   //
   selectedState.value = [];
+  isfirst.value = true;
+  shiftNum.value = NaN;
 }
 
 let enter = (name: string, type: string) => {
   if (type == '文件夹') {
+    //双击进入文件夹
     directory.value.push(name);
     state.currentFile = <Folder[]>(
       state.currentFile.find((item: { name: string }) => item.name == name)
         ?.children
     );
+    selectedState.value = [];
+    isfirst.value = true;
+    shiftNum.value = NaN;
     isPreview.value = '#FFF';
   } else {
     isPreview.value = '#999';
   }
 };
 let preview = (type: string, name: string, index: number) => {
-  // console.log(shiftNum.value, name, index);
+  //单击列表事件
   if (type != '文件夹') {
     isPreview.value = '#999';
   } else {
@@ -130,10 +144,11 @@ let preview = (type: string, name: string, index: number) => {
     }
   } else if (isshift.value) {
     // 如果按下的是shift
-    if (selectedState.value.length == 0) {
-      // shift第一次点击
-      shiftNum.value = index; // 让当前点击的下标赋值给shiftNum
-      selectedState.value.push(name);
+    if (isfirst.value) {
+      //第一次点击
+      if (selectedState.value.length == 0) {
+        selectedState.value.push(name);
+      }
     } else {
       console.log(shiftNum.value, index);
       selectedState.value = [];
@@ -145,9 +160,17 @@ let preview = (type: string, name: string, index: number) => {
         // 把中间的都选中
         selectedState.value.push(state.currentFile[i].name);
       }
-      shiftNum.value = index; // 让当前点击的下标赋值给shiftNum
     }
     console.log(selectedState.value);
+  }
+  isfirst.value = false;
+  shiftNum.value = index; // 让当前点击的下标赋值给shiftNum
+  if (!isshift.value && !isctrl.value) {
+    //没有进入键盘事件
+    selectedState.value = [name];
+  }
+  if (selectedState.value.length == 0) {
+    selectedState.value.push(name);
   }
 };
 function compare() {
@@ -170,7 +193,6 @@ function compare() {
 let currentFile = computed(() => {
   return state.currentFile.sort(compare());
 });
-console.log(currentFile);
 
 //
 
@@ -196,10 +218,8 @@ const keyDown = () => {
     // 取消默认事件
     e.preventDefault();
     //事件对象兼容
-    let e1 = e || event || window.event;
     switch (e.keyCode) {
       case 16:
-        shiftNum.value = 0;
         isshift.value = false; // 如果shift抬起下就让他按下的标识符变为false
         break;
       case 17:
@@ -208,6 +228,19 @@ const keyDown = () => {
     }
   };
 };
+document.addEventListener('click', (e) => {
+  //点击当前区域之外的位置取消选择
+  const contentWrap = document.getElementById('contentWrap');
+  if (contentWrap) {
+    if (
+      !contentWrap.contains(e.target as HTMLInputElement) &&
+      !isshift.value &&
+      !isctrl.value
+    ) {
+      selectedState.value = [];
+    }
+  }
+});
 onMounted(() => {
   getFolderData();
   keyDown();
@@ -219,6 +252,6 @@ onMounted(() => {
   background-color: v-bind(isPreview);
 }
 .selectedState {
-  background-color: rgba(147, 197, 253) !important;
+  background-color: #93c5fd !important;
 }
 </style>
